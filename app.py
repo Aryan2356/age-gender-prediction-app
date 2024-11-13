@@ -58,7 +58,7 @@ option = st.radio("Choose an input method:", ("Camera", "Upload Image"))
 
 if option == "Camera":
     # Start the webcam feed if 'Open Camera' is clicked
-    if st.button("Open Camera"):
+    if st.button("Open Camera", key="open_camera"):
         st.write("Click 'Stop' to end the camera.")
         video_capture = cv2.VideoCapture(0)
         while True:
@@ -73,7 +73,7 @@ if option == "Camera":
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
             st.image(frame, channels="RGB")
-            if st.button("Stop"):
+            if st.button("Stop", key="stop_camera"):
                 video_capture.release()
                 break
 
