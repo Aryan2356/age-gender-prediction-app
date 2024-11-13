@@ -61,21 +61,33 @@ if option == "Camera":
     if st.button("Open Camera", key="open_camera"):
         st.write("Click 'Stop' to end the camera.")
         video_capture = cv2.VideoCapture(0)
-        while True:
-            _, frame = video_capture.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            face_boxes = detect_faces(faceNet, frame)
-            for box in face_boxes:
-                x1, y1, x2, y2 = box
-                face = frame[y1:y2, x1:x2]
-                gender, age = predict_age_gender(faceNet, ageNet, genderNet, face)
-                label = f"{gender}, {age}"
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-            st.image(frame, channels="RGB")
-            if st.button("Stop", key="stop_camera"):
-                video_capture.release()
-                break
+        
+        # Check if the camera opened successfully
+        if not video_capture.isOpened():
+            st.error("Error: Could not open camera.")
+        else:
+            while True:
+                ret, frame = video_capture.read()
+                if not ret:
+                    st.error("Error: Could not read frame.")
+                    break
+                
+                # Convert frame from BGR to RGB
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                face_boxes = detect_faces(faceNet, frame)
+                
+                for box in face_boxes:
+                    x1, y1, x2, y2 = box
+                    face = frame[y1:y2, x1:x2]
+                    gender, age = predict_age_gender(faceNet, ageNet, genderNet, face)
+                    label = f"{gender}, {age}"
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+                
+                st.image(frame, channels="RGB")
+                if st.button("Stop", key="stop_camera"):
+                    video_capture.release()
+                    break
 
 elif option == "Upload Image":
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
@@ -94,3 +106,4 @@ elif option == "Upload Image":
             cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
         
         st.image(frame, caption='Processed Image', use_column_width=True)
+
